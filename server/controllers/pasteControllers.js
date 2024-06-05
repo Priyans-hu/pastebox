@@ -3,8 +3,8 @@ const Paste = require('../models/pasteModel');
 // Create a new paste
 exports.createPaste = async (req, res) => {
     try {
-        const { content, language, expiration, isPrivate } = req.body;
-        const paste = new Paste({ content, language, expiration, isPrivate });
+        const { code } = req.body; 
+        const paste = new Paste({ content: code, language: 'javascript' }); 
         await paste.save();
         res.status(201).json(paste);
     } catch (error) {
