@@ -1,10 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_BASE_URL;
+// const API_BASE_URL = process.env.REACT_APP_BASE_URL;
+const API_BASE_URL = "http://localhost:5000";
 
 class PasteApi {
     pasteApi = axios.create({
-        baseURL: `${API_BASE_URL}/api/paste`,
+        baseURL: `${API_BASE_URL}/api/pastes/`,
         withCredentials: true,
     });
 
@@ -16,8 +17,8 @@ class PasteApi {
         return this.pasteApi.get(`/user/${userId}`);
     }
 
-    createPaste(pasteData) {
-        return this.pasteApi.post('/', pasteData);
+    createPaste(code) {
+        return this.pasteApi.post('/', { code });
     }
 
     getPasteById(pasteId) {

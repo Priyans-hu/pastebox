@@ -5,3 +5,52 @@
 body {
     @apply bg-gray-900 text-white min-h-screen;
 }
+
+.editor-line-number {
+    display: inline-block;
+    width: 2em;
+    user-select: none;
+    opacity: 0.5;
+    text-align: right;
+    margin-right: 1.5em;
+}
+
+textarea:focus, input:focus, button:focus {
+    outline: none;
+}
+
+pre, code {
+    font-family: "Fira Code", "Fira Mono", monospace;
+}
+
+/* dracula.css */
+body {
+    background-color: #282a36;
+    color: #f8f8f2;
+    font-family: 'Roboto', sans-serif;
+}
+
+.bg-dracula {
+    background-color: #282a36;
+}
+
+.bg-dracula-dark {
+    background-color: #44475a;
+}
+
+.text-dracula-fg {
+    color: #f8f8f2;
+}
+
+.editor-line-number {
+    display: inline-block;
+    width: 2em;
+    text-align: right;
+    margin-right: 1em;
+    user-select: none;
+    color: #6272a4;
+}
+
+.code-editor {
+    line-height: 1.5;
+}
