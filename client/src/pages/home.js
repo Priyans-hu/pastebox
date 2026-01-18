@@ -5,11 +5,20 @@ import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import pasteApi from '../api/pasteApi';
 import { LANGUAGES } from '../constants/languages';
 
+const EXPIRATION_OPTIONS = [
+    { value: '1h', label: '1 Hour' },
+    { value: '1d', label: '1 Day' },
+    { value: '1w', label: '1 Week' },
+    { value: '1m', label: '1 Month' },
+    { value: 'never', label: 'Never' }
+];
+
 function Home() {
     const navigate = useNavigate();
     const [content, setContent] = useState('');
     const [title, setTitle] = useState('');
     const [language, setLanguage] = useState('plaintext');
+    const [expiresIn, setExpiresIn] = useState('1w');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -24,7 +33,8 @@ function Home() {
             const response = await pasteApi.createPaste({
                 content,
                 language,
-                title: title.trim() || 'Untitled'
+                title: title.trim() || 'Untitled',
+                expiresIn
             });
             navigate(`/${response.data._id}`);
         } catch (err) {
@@ -50,7 +60,7 @@ function Home() {
             {/* Main Content */}
             <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Title and Language Row */}
+                    {/* Title, Language, and Expiration Row */}
                     <div className="flex flex-col sm:flex-row gap-4">
                         <input
                             type="text"
@@ -68,6 +78,17 @@ function Home() {
                             {LANGUAGES.map((lang) => (
                                 <option key={lang.value} value={lang.value}>
                                     {lang.label}
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            value={expiresIn}
+                            onChange={(e) => setExpiresIn(e.target.value)}
+                            className="bg-[#44475a] text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer"
+                        >
+                            {EXPIRATION_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                    {opt.label}
                                 </option>
                             ))}
                         </select>
@@ -142,7 +163,10 @@ function Home() {
                 <div className="mt-8 text-center text-gray-500 text-sm">
                     <p>
                         <i className="fas fa-clock mr-1"></i>
-                        Pastes automatically expire after 7 days
+                        {expiresIn === 'never'
+                            ? 'This paste will never expire'
+                            : `Paste will expire after ${EXPIRATION_OPTIONS.find(o => o.value === expiresIn)?.label.toLowerCase()}`
+                        }
                     </p>
                 </div>
             </main>
