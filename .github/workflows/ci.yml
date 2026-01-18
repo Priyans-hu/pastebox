@@ -31,6 +31,9 @@ jobs:
       - name: Run linter
         run: npm run lint
 
+      - name: Run tests
+        run: npm test
+
       - name: Check for vulnerabilities
         run: npm audit --audit-level=high
         continue-on-error: true
