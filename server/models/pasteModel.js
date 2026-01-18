@@ -16,14 +16,14 @@ const parseExpiration = (expiresIn) => {
     const unit = match[2];
 
     switch (unit) {
-        case 'h': // Hours (max 24)
-            return Math.min(value, 24) * 60 * 60 * 1000;
-        case 'd': // Days (max 7)
-            return Math.min(value, 7) * 24 * 60 * 60 * 1000;
-        case 'w': // Weeks (max 1)
-            return 7 * 24 * 60 * 60 * 1000;
-        default:
-            return 7 * 24 * 60 * 60 * 1000;
+    case 'h': // Hours (max 24)
+        return Math.min(value, 24) * 60 * 60 * 1000;
+    case 'd': // Days (max 7)
+        return Math.min(value, 7) * 24 * 60 * 60 * 1000;
+    case 'w': // Weeks (max 1)
+        return 7 * 24 * 60 * 60 * 1000;
+    default:
+        return 7 * 24 * 60 * 60 * 1000;
     }
 };
 
