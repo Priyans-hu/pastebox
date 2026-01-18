@@ -1,38 +1,34 @@
 import axios from 'axios';
 
-// const API_BASE_URL = process.env.REACT_APP_BASE_URL;
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 class PasteApi {
-    pasteApi = axios.create({
-        baseURL: `${API_BASE_URL}/api/pastes/`,
-        withCredentials: true,
-    });
-
-    getAllPastes() {
-        return this.pasteApi.get('/');
+    constructor() {
+        this.api = axios.create({
+            baseURL: `${API_BASE_URL}/api/pastes`,
+            withCredentials: true,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
     }
 
-    getUserPastes(userId) {
-        return this.pasteApi.get(`/user/${userId}`);
-    }
-
-    createPaste(code) {
-        return this.pasteApi.post('/', { code });
+    createPaste({ content, language = 'plaintext', title = 'Untitled' }) {
+        return this.api.post('/', { content, language, title });
     }
 
     getPasteById(pasteId) {
-        return this.pasteApi.get(`/${pasteId}`);
-    }
-
-    updatePaste(pasteId, updatedData) {
-        return this.pasteApi.put(`/${pasteId}`, updatedData);
+        return this.api.get(`/${pasteId}`);
     }
 
     deletePaste(pasteId) {
-        return this.pasteApi.delete(`/${pasteId}`);
+        return this.api.delete(`/${pasteId}`);
+    }
+
+    searchPastes(query) {
+        return this.api.get('/search', { params: { q: query } });
     }
 }
 
-const PasteApiInstance = new PasteApi();
-export default PasteApiInstance;
+const pasteApi = new PasteApi();
+export default pasteApi;

@@ -2,55 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base styles */
 body {
-    @apply bg-gray-900 text-white min-h-screen;
+    @apply bg-[#282a36] text-white min-h-screen antialiased;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.editor-line-number {
-    display: inline-block;
-    width: 2em;
-    user-select: none;
-    opacity: 0.5;
-    text-align: right;
-    margin-right: 1.5em;
-}
-
-textarea:focus, input:focus, button:focus {
+/* Remove focus outline and add custom */
+textarea:focus,
+input:focus,
+button:focus,
+select:focus {
     outline: none;
 }
 
-pre, code {
-    font-family: "Fira Code", "Fira Mono", monospace;
+/* Code font */
+pre, code, textarea {
+    font-family: "Fira Code", "Fira Mono", "Consolas", monospace;
 }
 
-/* dracula.css */
-body {
-    background-color: #282a36;
-    color: #f8f8f2;
-    font-family: 'Roboto', sans-serif;
+/* Custom scrollbar for webkit */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
 }
 
-.bg-dracula {
-    background-color: #282a36;
+::-webkit-scrollbar-track {
+    background: #1e1f29;
 }
 
-.bg-dracula-dark {
-    background-color: #44475a;
+::-webkit-scrollbar-thumb {
+    background: #44475a;
+    border-radius: 4px;
 }
 
-.text-dracula-fg {
-    color: #f8f8f2;
+::-webkit-scrollbar-thumb:hover {
+    background: #6272a4;
 }
 
-.editor-line-number {
-    display: inline-block;
-    width: 2em;
-    text-align: right;
-    margin-right: 1em;
-    user-select: none;
-    color: #6272a4;
-}
-
-.code-editor {
-    line-height: 1.5;
+/* Selection color */
+::selection {
+    background: #bd93f9;
+    color: #282a36;
 }

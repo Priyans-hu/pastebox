@@ -1,119 +1,168 @@
-import React, { useState, useEffect } from 'react';
-import Editor from 'react-simple-code-editor';
-import Prism from 'prismjs';
-import 'prismjs/themes/prism-tomorrow.css';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-css';
-import 'prismjs/components/prism-markup';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PasteApiInstance from '../api/pasteApi';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import 'dracula-prism/dist/css/dracula-prism.css';
+import pasteApi from '../api/pasteApi';
+import { LANGUAGES } from '../constants/languages';
 
 function Home() {
     const navigate = useNavigate();
-    const [code, setCode] = useState('');
+    const [content, setContent] = useState('');
+    const [title, setTitle] = useState('');
+    const [language, setLanguage] = useState('plaintext');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [pasteSuccess, setPasteSuccess] = useState(false);
-
-    const handleCodeChange = (newCode) => {
-        setCode(newCode);
-        setPasteSuccess(false);
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!code.trim()) return;
+        if (!content.trim()) return;
 
         setLoading(true);
         setError(null);
 
         try {
-            const response = await PasteApiInstance.createPaste(code);
-            setPasteSuccess(true);
+            const response = await pasteApi.createPaste({
+                content,
+                language,
+                title: title.trim() || 'Untitled'
+            });
             navigate(`/${response.data._id}`);
-        } catch (error) {
-            setError('An error occurred while creating the paste.');
+        } catch (err) {
+            setError(err.response?.data?.error || 'Failed to create paste. Please try again.');
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
-    useEffect(() => {
-        const lineCount = code.split('\n').length;
-    }, [code]);
-
     return (
-        <div className="min-h-screen flex flex-col items-center bg-dracula text-dracula-fg">
-            <header className="p-8 w-2/3 flex justify-between">
-                <h1 className="text-3xl font-bold" style={{ fontFamily: "'Roboto Slab', serif" }}>
-                    Pastebox
-                </h1>
+        <div className="min-h-screen flex flex-col bg-[#282a36]">
+            {/* Header */}
+            <header className="border-b border-gray-700">
+                <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+                    <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Roboto Slab', serif" }}>
+                        <i className="fas fa-clipboard mr-2 text-purple-400"></i>
+                        PasteBox
+                    </h1>
+                    <span className="text-gray-400 text-sm">Share code snippets easily</span>
+                </div>
             </header>
-            <main className="flex-grow flex flex-col items-center justify-center w-full px-4 py-8">
-                <h2 className="text-2xl font-semibold mb-4">
-                    <i className="fas fa-paste mr-2"></i>Paste your code
-                </h2>
-                <form onSubmit={handleSubmit} className="w-3/4">
-                    <div className="border border-gray-600 bg-dracula-dark text-dracula-fg rounded-lg mb-4 p-4 overflow-y-auto" style={{ height: '70vh' }}>
-                        <Editor
-                            value={code}
-                            onValueChange={handleCodeChange}
-                            highlight={(code) => (
+
+            {/* Main Content */}
+            <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Title and Language Row */}
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <input
+                            type="text"
+                            placeholder="Paste title (optional)"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="flex-1 bg-[#44475a] text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                            maxLength={100}
+                        />
+                        <select
+                            value={language}
+                            onChange={(e) => setLanguage(e.target.value)}
+                            className="bg-[#44475a] text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer"
+                        >
+                            {LANGUAGES.map((lang) => (
+                                <option key={lang.value} value={lang.value}>
+                                    {lang.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Code Editor */}
+                    <div className="relative">
+                        <textarea
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            placeholder="Paste your code here..."
+                            className="w-full h-[60vh] bg-[#282a36] text-[#f8f8f2] p-4 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors resize-none font-mono text-sm"
+                            style={{ fontFamily: '"Fira Code", "Fira Mono", monospace' }}
+                            spellCheck={false}
+                        />
+                        <div className="absolute bottom-3 right-3 text-gray-500 text-sm">
+                            {content.length} characters | {content.split('\n').length} lines
+                        </div>
+                    </div>
+
+                    {/* Preview (if content exists) */}
+                    {content.trim() && (
+                        <div className="border border-gray-600 rounded-lg overflow-hidden">
+                            <div className="bg-[#44475a] px-4 py-2 text-sm text-gray-300 flex items-center justify-between">
+                                <span>
+                                    <i className="fas fa-eye mr-2"></i>Preview
+                                </span>
+                                <span className="text-purple-400">{LANGUAGES.find(l => l.value === language)?.label}</span>
+                            </div>
+                            <div className="max-h-[200px] overflow-auto">
                                 <SyntaxHighlighter
-                                    language="javascript"
+                                    language={language}
                                     style={dracula}
                                     showLineNumbers
-                                    wrapLines
-                                    lineProps={{ style: { display: 'block' } }}
+                                    customStyle={{ margin: 0, borderRadius: 0 }}
                                 >
-                                    {code}
+                                    {content}
                                 </SyntaxHighlighter>
-                            )}
-                            padding={10}
-                            style={{
-                                fontFamily: '"Fira Code", "Fira Mono", monospace',
-                                fontSize: 16,
-                                backgroundColor: '#282a36',
-                                color: '#f8f8f2',
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-all',
-                                height: '100%',
-                                overflowY: 'auto',
-                            }}
-                            className="editor w-full"
-                        />
-                    </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Error Message */}
+                    {error && (
+                        <div className="bg-red-500/20 border border-red-500 text-red-300 px-4 py-2 rounded-lg">
+                            <i className="fas fa-exclamation-circle mr-2"></i>
+                            {error}
+                        </div>
+                    )}
+
+                    {/* Submit Button */}
                     <button
                         type="submit"
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-500 w-full"
-                        disabled={!code.trim() || loading}
+                        disabled={!content.trim() || loading}
+                        className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
                     >
                         {loading ? (
                             <>
-                                <i className="fas fa-spinner fa-spin mr-2"></i>Pasting...
+                                <i className="fas fa-spinner fa-spin"></i>
+                                Creating paste...
                             </>
                         ) : (
                             <>
-                                <i className="fas fa-paper-plane mr-2"></i>Paste
+                                <i className="fas fa-paper-plane"></i>
+                                Create Paste
                             </>
                         )}
                     </button>
                 </form>
 
-                {error && <p className="text-red-500 mt-4">{error}</p>}
-
-                {pasteSuccess && (
-                    <div className="mt-8 w-full max-w-6xl">
-                        <h2 className="text-xl font-semibold mb-4">
-                            <i className="fas fa-check-circle mr-2"></i>Your code snippet
-                        </h2>
-                        <pre className="bg-gray-900 text-white p-4 rounded-lg">{code}</pre>
-                    </div>
-                )}
+                {/* Info */}
+                <div className="mt-8 text-center text-gray-500 text-sm">
+                    <p>
+                        <i className="fas fa-clock mr-1"></i>
+                        Pastes automatically expire after 7 days
+                    </p>
+                </div>
             </main>
+
+            {/* Footer */}
+            <footer className="border-t border-gray-700 py-4">
+                <div className="max-w-6xl mx-auto px-4 text-center text-gray-500 text-sm">
+                    <a
+                        href="https://github.com/Priyans-hu/PasteBox"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-purple-400 transition-colors"
+                    >
+                        <i className="fab fa-github mr-1"></i>
+                        PasteBox
+                    </a>
+                    {' '}&bull;{' '}
+                    Built by Priyanshu
+                </div>
+            </footer>
         </div>
     );
 }
