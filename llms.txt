@@ -1,0 +1,50 @@
+# PasteBox
+
+> A modern pastebin service for sharing code snippets with syntax highlighting.
+
+## Overview
+
+PasteBox is a full-stack web application that allows users to create, share, and manage code snippets. Built with React, Node.js, Express, MongoDB, and Redis.
+
+## Key Features
+
+- Syntax highlighting for 25+ programming languages
+- Custom expiration times (1-24 hours, 1-7 days, 1 week)
+- View count analytics
+- Raw/plain text endpoint for programmatic access
+- Redis caching for fast retrieval
+- MongoDB TTL indexes for automatic cleanup
+- Docker support for easy deployment
+
+## Tech Stack
+
+- Frontend: React 18, TailwindCSS, React Syntax Highlighter
+- Backend: Node.js 18+, Express 4.21
+- Database: MongoDB 8 with TTL indexes
+- Cache: Redis 7 (optional)
+- Containerization: Docker, docker-compose
+
+## API Endpoints
+
+- POST /api/pastes - Create a new paste
+- GET /api/pastes/:id - Get paste by ID
+- GET /api/pastes/:id/raw - Get raw paste content
+- GET /api/pastes/:id/analytics - Get paste view statistics
+- DELETE /api/pastes/:id - Delete a paste
+- GET /api/pastes/search?q=query - Search pastes
+- GET /health - Health check
+
+## Repository Structure
+
+- /client - React frontend
+- /server - Express backend
+- /scripts - Utility scripts (bash, python, typescript)
+- /docker-compose.yml - Full stack deployment
+
+## Author
+
+Priyanshu Garg - https://github.com/Priyans-hu
+
+## License
+
+MIT License
