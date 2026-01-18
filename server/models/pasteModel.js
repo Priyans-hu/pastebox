@@ -1,12 +1,43 @@
 const mongoose = require('mongoose');
 
-// Expiration options in milliseconds
-const EXPIRATION_OPTIONS = {
-    '1h': 60 * 60 * 1000,           // 1 hour
-    '1d': 24 * 60 * 60 * 1000,      // 1 day
-    '1w': 7 * 24 * 60 * 60 * 1000,  // 1 week
-    '1m': 30 * 24 * 60 * 60 * 1000, // 1 month
-    'never': null                    // No expiration
+// Parse expiration string to milliseconds
+// Supports: "1h" to "24h" for hours, "1d" to "7d" for days, "1w" for week
+const parseExpiration = (expiresIn) => {
+    if (!expiresIn || typeof expiresIn !== 'string') {
+        return 7 * 24 * 60 * 60 * 1000; // Default: 1 week
+    }
+
+    const match = expiresIn.match(/^(\d+)(h|d|w)$/);
+    if (!match) {
+        return 7 * 24 * 60 * 60 * 1000; // Default: 1 week
+    }
+
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
+
+    switch (unit) {
+        case 'h': // Hours (max 24)
+            return Math.min(value, 24) * 60 * 60 * 1000;
+        case 'd': // Days (max 7)
+            return Math.min(value, 7) * 24 * 60 * 60 * 1000;
+        case 'w': // Weeks (max 1)
+            return 7 * 24 * 60 * 60 * 1000;
+        default:
+            return 7 * 24 * 60 * 60 * 1000;
+    }
+};
+
+// Validate expiration string
+const isValidExpiration = (expiresIn) => {
+    if (!expiresIn || typeof expiresIn !== 'string') return false;
+    const match = expiresIn.match(/^(\d+)(h|d|w)$/);
+    if (!match) return false;
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
+    if (unit === 'h') return value >= 1 && value <= 24;
+    if (unit === 'd') return value >= 1 && value <= 7;
+    if (unit === 'w') return value === 1;
+    return false;
 };
 
 const PasteSchema = new mongoose.Schema({
@@ -24,8 +55,11 @@ const PasteSchema = new mongoose.Schema({
     },
     expiresIn: {
         type: String,
-        enum: ['1h', '1d', '1w', '1m', 'never'],
-        default: '1w'
+        default: '1w',
+        validate: {
+            validator: isValidExpiration,
+            message: 'Invalid expiration format. Use 1-24h, 1-7d, or 1w'
+        }
     },
     expiresAt: {
         type: Date,
@@ -45,20 +79,14 @@ const PasteSchema = new mongoose.Schema({
 // Calculate expiresAt before saving
 PasteSchema.pre('save', function(next) {
     if (this.isNew || this.isModified('expiresIn')) {
-        const duration = EXPIRATION_OPTIONS[this.expiresIn];
-        if (duration === null) {
-            this.expiresAt = null; // Never expires
-        } else {
-            this.expiresAt = new Date(Date.now() + duration);
-        }
+        const duration = parseExpiration(this.expiresIn);
+        this.expiresAt = new Date(Date.now() + duration);
     }
     next();
 });
 
-// Static method to get expiration options
-PasteSchema.statics.getExpirationOptions = function() {
-    return Object.keys(EXPIRATION_OPTIONS);
-};
+// Static method to validate expiration
+PasteSchema.statics.isValidExpiration = isValidExpiration;
 
 const Paste = mongoose.model('Paste', PasteSchema);
 module.exports = Paste;
