@@ -148,63 +148,63 @@ const PastedCode = ({ id }) => {
             {/* Main Content */}
             <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
                 {/* Paste Info Bar */}
-                <div className="bg-[#44475a] rounded-lg p-4 mb-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div>
-                            <h1 className="text-xl font-bold text-white mb-1">
+                <div className="bg-[#44475a] rounded-t-lg p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                            <h1 className="text-xl font-bold text-white mb-2 truncate">
                                 {paste.title || 'Untitled'}
                             </h1>
-                            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400">
-                                <span className="flex items-center gap-1">
-                                    <i className="fas fa-code"></i>
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                                <span className="flex items-center gap-1.5 text-purple-300 bg-purple-500/20 px-2 py-1 rounded">
+                                    <i className="fas fa-code text-xs"></i>
                                     {getLanguageLabel(paste.language)}
                                 </span>
-                                <span className="flex items-center gap-1">
-                                    <i className="fas fa-calendar"></i>
+                                <span className="flex items-center gap-1.5 text-gray-400">
+                                    <i className="fas fa-calendar text-xs"></i>
                                     {formatDate(paste.createdAt)}
                                 </span>
-                                <span className="flex items-center gap-1 text-yellow-400">
-                                    <i className="fas fa-clock"></i>
+                                <span className="flex items-center gap-1.5 text-yellow-400">
+                                    <i className="fas fa-clock text-xs"></i>
                                     {getTimeUntilExpiry(paste.expiresAt)}
                                 </span>
-                                <span className="flex items-center gap-1 text-green-400">
-                                    <i className="fas fa-eye"></i>
+                                <span className="flex items-center gap-1.5 text-green-400">
+                                    <i className="fas fa-eye text-xs"></i>
                                     {formatViews(paste.views)}
                                 </span>
                             </div>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2 sm:flex-nowrap">
                             <button
                                 onClick={handleViewRaw}
-                                className="flex items-center gap-2 bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+                                className="flex items-center justify-center gap-2 bg-[#1e1f29] hover:bg-[#2d2f3d] text-gray-300 px-3 py-2 rounded-lg transition-colors text-sm border border-gray-600"
                                 title="View raw paste"
                             >
                                 <i className="fas fa-file-alt"></i>
-                                Raw
+                                <span className="hidden sm:inline">Raw</span>
                             </button>
                             <button
                                 onClick={handleCopyLink}
-                                className="flex items-center gap-2 bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+                                className="flex items-center justify-center gap-2 bg-[#1e1f29] hover:bg-[#2d2f3d] text-gray-300 px-3 py-2 rounded-lg transition-colors text-sm border border-gray-600"
                             >
                                 {linkCopied ? (
                                     <>
                                         <i className="fas fa-check text-green-400"></i>
-                                        Copied!
+                                        <span className="hidden sm:inline">Copied!</span>
                                     </>
                                 ) : (
                                     <>
                                         <i className="fas fa-link"></i>
-                                        Copy Link
+                                        <span className="hidden sm:inline">Copy Link</span>
                                     </>
                                 )}
                             </button>
                             <button
                                 onClick={handleCopyCode}
-                                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+                                className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
                             >
                                 {copied ? (
                                     <>
-                                        <i className="fas fa-check text-green-400"></i>
+                                        <i className="fas fa-check"></i>
                                         Copied!
                                     </>
                                 ) : (
@@ -219,12 +219,17 @@ const PastedCode = ({ id }) => {
                 </div>
 
                 {/* Code Display */}
-                <div className="border border-gray-600 rounded-lg overflow-hidden">
-                    <div className="bg-[#1e1f29] px-4 py-2 text-sm text-gray-400 flex items-center justify-between border-b border-gray-700">
-                        <span>
-                            {paste.content.split('\n').length} lines | {paste.content.length} characters
+                <div className="border border-t-0 border-gray-600 rounded-b-lg overflow-hidden">
+                    <div className="bg-[#1e1f29] px-4 py-2 text-sm text-gray-500 flex items-center justify-between border-b border-gray-700">
+                        <span className="flex items-center gap-2">
+                            <i className="fas fa-file-code text-xs"></i>
+                            {paste.content.split('\n').length} lines
+                            <span className="text-gray-600">|</span>
+                            {paste.content.length} chars
                         </span>
-                        <span className="text-purple-400">{getLanguageLabel(paste.language)}</span>
+                        <span className="text-gray-500 text-xs">
+                            ID: <code className="text-purple-400 font-mono">{id}</code>
+                        </span>
                     </div>
                     <SyntaxHighlighter
                         language={paste.language}
@@ -233,20 +238,15 @@ const PastedCode = ({ id }) => {
                         customStyle={{
                             margin: 0,
                             borderRadius: 0,
-                            fontSize: '14px',
-                            maxHeight: '70vh'
+                            fontSize: '13px',
+                            maxHeight: '65vh',
+                            background: '#282a36'
                         }}
-                        lineNumberStyle={{ minWidth: '3em', paddingRight: '1em', color: '#6272a4' }}
+                        lineNumberStyle={{ minWidth: '3em', paddingRight: '1em', color: '#6272a4', userSelect: 'none' }}
+                        codeTagProps={{ style: { fontFamily: '"Fira Code", "Fira Mono", Consolas, monospace' } }}
                     >
                         {paste.content}
                     </SyntaxHighlighter>
-                </div>
-
-                {/* Raw View Link */}
-                <div className="mt-4 text-center">
-                    <span className="text-gray-500 text-sm">
-                        Paste ID: <code className="text-purple-400">{id}</code>
-                    </span>
                 </div>
             </main>
 
