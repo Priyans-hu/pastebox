@@ -58,6 +58,8 @@ const PastedCode = ({ id }) => {
     };
 
     const getTimeUntilExpiry = (expiresAt) => {
+        if (!expiresAt) return 'Never expires';
+
         const now = new Date();
         const expiry = new Date(expiresAt);
         const diff = expiry - now;
@@ -70,6 +72,18 @@ const PastedCode = ({ id }) => {
         if (days > 0) return `${days}d ${hours}h remaining`;
         if (hours > 0) return `${hours}h remaining`;
         return 'Less than 1 hour remaining';
+    };
+
+    const formatViews = (views) => {
+        if (!views) return '0 views';
+        if (views === 1) return '1 view';
+        if (views >= 1000) return `${(views / 1000).toFixed(1)}k views`;
+        return `${views} views`;
+    };
+
+    const handleViewRaw = () => {
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+        window.open(`${apiUrl}/api/pastes/${id}/raw`, '_blank');
     };
 
     if (loading) {
@@ -153,9 +167,21 @@ const PastedCode = ({ id }) => {
                                     <i className="fas fa-clock"></i>
                                     {getTimeUntilExpiry(paste.expiresAt)}
                                 </span>
+                                <span className="flex items-center gap-1 text-green-400">
+                                    <i className="fas fa-eye"></i>
+                                    {formatViews(paste.views)}
+                                </span>
                             </div>
                         </div>
                         <div className="flex gap-2">
+                            <button
+                                onClick={handleViewRaw}
+                                className="flex items-center gap-2 bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+                                title="View raw paste"
+                            >
+                                <i className="fas fa-file-alt"></i>
+                                Raw
+                            </button>
                             <button
                                 onClick={handleCopyLink}
                                 className="flex items-center gap-2 bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors text-sm"
