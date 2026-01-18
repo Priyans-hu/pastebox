@@ -4,6 +4,13 @@
  */
 
 /**
+ * Expiration duration format
+ * Supports: 1-24h (hours), 1-7d (days), 1w (week)
+ * Examples: '1h', '12h', '24h', '1d', '3d', '7d', '1w'
+ */
+export type ExpirationOption = `${number}h` | `${number}d` | '1w';
+
+/**
  * Paste document as stored in MongoDB
  */
 export interface IPaste {
@@ -11,8 +18,10 @@ export interface IPaste {
     title: string;
     content: string;
     language: string;
+    expiresIn: ExpirationOption;
+    views: number;
     createdAt: Date;
-    expiresAt: Date;
+    expiresAt: Date | null;
 }
 
 /**
@@ -22,6 +31,7 @@ export interface CreatePasteRequest {
     content: string;
     language?: string;
     title?: string;
+    expiresIn?: ExpirationOption;
 }
 
 /**
@@ -32,8 +42,10 @@ export interface PasteResponse {
     title: string;
     content: string;
     language: string;
+    expiresIn: ExpirationOption;
+    views: number;
     createdAt: string;
-    expiresAt: string;
+    expiresAt: string | null;
 }
 
 /**
@@ -43,8 +55,21 @@ export interface PasteSearchResult {
     _id: string;
     title: string;
     language: string;
+    views: number;
     createdAt: string;
-    expiresAt: string;
+    expiresAt: string | null;
+}
+
+/**
+ * Paste analytics response
+ */
+export interface PasteAnalytics {
+    id: string;
+    title: string;
+    views: number;
+    createdAt: string;
+    expiresAt: string | null;
+    expiresIn: ExpirationOption;
 }
 
 /**
