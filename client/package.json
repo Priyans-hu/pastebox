@@ -1,39 +1,51 @@
 {
-  "name": "client",
-  "version": "0.1.0",
+  "name": "pastebox-client",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.7.2",
-    "dracula-prism": "^2.1.16",
-    "postcss": "^8.4.38",
-    "prefixer": "^0.0.3",
-    "prism-react-renderer": "^2.3.1",
-    "prismjs": "^1.29.0",
+    "axios": "^1.7.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router": "^6.23.1",
-    "react-router-dom": "^6.23.1",
+    "react-router-dom": "^6.27.0",
+    "react-syntax-highlighter": "^16.1.0",
+    "web-vitals": "^3.5.2"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^14.3.1",
+    "@testing-library/user-event": "^14.5.2",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
     "react-scripts": "5.0.1",
-    "react-simple-code-editor": "^0.13.1",
-    "react-syntax-highlighter": "^15.5.0",
-    "tailwindcss": "^3.4.3",
-    "toastify": "^2.0.1",
-    "web-vitals": "^2.1.4"
+    "tailwindcss": "^3.4.14"
+  },
+  "overrides": {
+    "nth-check": "^2.1.1",
+    "postcss": "^8.4.47",
+    "webpack-dev-server": "^5.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test": "react-scripts test --passWithNoTests",
+    "eject": "react-scripts eject",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "no-unused-vars": [
+        "warn",
+        {
+          "argsIgnorePattern": "^_"
+        }
+      ],
+      "react/prop-types": "off"
+    }
   },
   "browserslist": {
     "production": [
