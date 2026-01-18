@@ -3,13 +3,16 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const pasteRoutes = require('./routes/pasteRoutes');
 const connectDB = require('./config/dbConnect');
+const { connectRedis, getCacheStats } = require('./config/redis');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Initialize database and cache
 connectDB();
+connectRedis();
 
 // CORS configuration
 const allowedOrigins = [
@@ -36,8 +39,16 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/health', async (req, res) => {
+    const cacheStats = await getCacheStats();
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        cache: {
+            enabled: cacheStats.enabled,
+            connected: cacheStats.connected || false
+        }
+    });
 });
 
 // API routes
