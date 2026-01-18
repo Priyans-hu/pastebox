@@ -78,44 +78,57 @@ function Home() {
             {/* Main Content */}
             <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Title, Language, and Expiration Row */}
-                    <div className="flex flex-col sm:flex-row gap-4 items-center">
+                    {/* Title Input */}
+                    <div className="w-full">
                         <input
                             type="text"
                             placeholder="Paste title (optional)"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="flex-1 bg-[#44475a] text-white text-center px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                            className="w-full bg-[#44475a] text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors placeholder-gray-400"
                             maxLength={100}
                         />
-                        <select
-                            value={language}
-                            onChange={(e) => setLanguage(e.target.value)}
-                            className="bg-[#44475a] text-white text-center px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer"
-                        >
-                            {LANGUAGES.map((lang) => (
-                                <option key={lang.value} value={lang.value}>
-                                    {lang.label}
-                                </option>
-                            ))}
-                        </select>
-                        <select
-                            value={expiresIn}
-                            onChange={(e) => setExpiresIn(e.target.value)}
-                            className="bg-[#44475a] text-white text-center px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer"
-                        >
-                            {EXPIRATION_OPTIONS.map((opt) => (
-                                <option key={opt.value} value={opt.value}>
-                                    {opt.label}
-                                </option>
-                            ))}
-                        </select>
+                    </div>
+
+                    {/* Language and Expiration Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="relative">
+                            <label className="block text-gray-400 text-xs mb-1 ml-1">Language</label>
+                            <select
+                                value={language}
+                                onChange={(e) => setLanguage(e.target.value)}
+                                className="w-full bg-[#44475a] text-white px-4 py-2.5 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer appearance-none"
+                            >
+                                {LANGUAGES.map((lang) => (
+                                    <option key={lang.value} value={lang.value}>
+                                        {lang.label}
+                                    </option>
+                                ))}
+                            </select>
+                            <i className="fas fa-chevron-down absolute right-3 top-9 text-gray-400 pointer-events-none text-xs"></i>
+                        </div>
+                        <div className="relative">
+                            <label className="block text-gray-400 text-xs mb-1 ml-1">Expires In</label>
+                            <select
+                                value={expiresIn}
+                                onChange={(e) => setExpiresIn(e.target.value)}
+                                className="w-full bg-[#44475a] text-white px-4 py-2.5 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer appearance-none"
+                            >
+                                {EXPIRATION_OPTIONS.map((opt) => (
+                                    <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                    </option>
+                                ))}
+                            </select>
+                            <i className="fas fa-chevron-down absolute right-3 top-9 text-gray-400 pointer-events-none text-xs"></i>
+                        </div>
                     </div>
 
                     {/* Custom Expiration Input */}
                     {expiresIn === 'custom' && (
-                        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-                            <div className="flex items-center gap-2">
+                        <div className="bg-[#1e1f29] rounded-lg p-4 border border-gray-700">
+                            <label className="block text-gray-400 text-xs mb-2">Custom Expiration</label>
+                            <div className="flex items-center gap-3">
                                 <input
                                     type="number"
                                     min="1"
@@ -123,19 +136,41 @@ function Home() {
                                     placeholder={customUnit === 'hours' ? '1-24' : '1-7'}
                                     value={customValue}
                                     onChange={(e) => setCustomValue(validateCustomInput(e.target.value, customUnit))}
-                                    className="w-24 bg-[#44475a] text-white text-center px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                                    className="w-20 bg-[#44475a] text-white text-center px-3 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
                                 />
-                                <select
-                                    value={customUnit}
-                                    onChange={(e) => {
-                                        setCustomUnit(e.target.value);
-                                        setCustomValue(validateCustomInput(customValue, e.target.value));
-                                    }}
-                                    className="bg-[#44475a] text-white text-center px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer"
-                                >
-                                    <option value="hours">Hours (max 24)</option>
-                                    <option value="days">Days (max 7)</option>
-                                </select>
+                                <div className="flex rounded-lg overflow-hidden border border-gray-600">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setCustomUnit('hours');
+                                            setCustomValue(validateCustomInput(customValue, 'hours'));
+                                        }}
+                                        className={`px-4 py-2 text-sm transition-colors ${
+                                            customUnit === 'hours'
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-[#44475a] text-gray-300 hover:bg-[#555770]'
+                                        }`}
+                                    >
+                                        Hours
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setCustomUnit('days');
+                                            setCustomValue(validateCustomInput(customValue, 'days'));
+                                        }}
+                                        className={`px-4 py-2 text-sm transition-colors ${
+                                            customUnit === 'days'
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-[#44475a] text-gray-300 hover:bg-[#555770]'
+                                        }`}
+                                    >
+                                        Days
+                                    </button>
+                                </div>
+                                <span className="text-gray-500 text-sm">
+                                    (max {customUnit === 'hours' ? '24 hours' : '7 days'})
+                                </span>
                             </div>
                         </div>
                     )}
