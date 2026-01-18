@@ -1,4 +1,5 @@
 const Paste = require('../models/pasteModel');
+const { getCachedPaste, cachePaste, invalidatePaste } = require('../config/redis');
 
 // Create a new paste
 exports.createPaste = async (req, res) => {
@@ -21,21 +22,36 @@ exports.createPaste = async (req, res) => {
     }
 };
 
-// Get a paste by ID
+// Get a paste by ID (with caching)
 exports.getPasteById = async (req, res) => {
     try {
-        const paste = await Paste.findById(req.params.id);
+        const { id } = req.params;
+
+        // Try cache first
+        const cached = await getCachedPaste(id);
+        if (cached) {
+            return res.json(cached);
+        }
+
+        // Fetch from database
+        const paste = await Paste.findById(id);
         if (!paste) {
             return res.status(404).json({ message: 'Paste not found or has expired' });
         }
-        res.json({
+
+        const pasteData = {
             id: paste._id,
             title: paste.title,
             language: paste.language,
             content: paste.content,
             createdAt: paste.createdAt,
             expiresAt: paste.expiresAt
-        });
+        };
+
+        // Cache the result
+        await cachePaste(id, pasteData);
+
+        res.json(pasteData);
     } catch (error) {
         if (error.name === 'CastError') {
             return res.status(404).json({ message: 'Invalid paste ID' });
@@ -47,10 +63,16 @@ exports.getPasteById = async (req, res) => {
 // Delete a paste by ID
 exports.deletePasteById = async (req, res) => {
     try {
-        const paste = await Paste.findByIdAndDelete(req.params.id);
+        const { id } = req.params;
+        const paste = await Paste.findByIdAndDelete(id);
+
         if (!paste) {
             return res.status(404).json({ message: 'Paste not found' });
         }
+
+        // Invalidate cache
+        await invalidatePaste(id);
+
         res.json({ message: 'Paste deleted successfully' });
     } catch (error) {
         if (error.name === 'CastError') {
