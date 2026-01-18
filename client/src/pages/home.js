@@ -9,8 +9,7 @@ const EXPIRATION_OPTIONS = [
     { value: '1h', label: '1 Hour' },
     { value: '1d', label: '1 Day' },
     { value: '1w', label: '1 Week' },
-    { value: '1m', label: '1 Month' },
-    { value: 'never', label: 'Never' }
+    { value: 'custom', label: 'Custom' }
 ];
 
 function Home() {
@@ -19,8 +18,27 @@ function Home() {
     const [title, setTitle] = useState('');
     const [language, setLanguage] = useState('plaintext');
     const [expiresIn, setExpiresIn] = useState('1w');
+    const [customValue, setCustomValue] = useState('');
+    const [customUnit, setCustomUnit] = useState('hours');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    const getExpirationValue = () => {
+        if (expiresIn !== 'custom') return expiresIn;
+        const val = parseInt(customValue, 10);
+        if (isNaN(val) || val <= 0) return '1w';
+        if (customUnit === 'hours') {
+            return `${Math.min(val, 24)}h`;
+        }
+        return `${Math.min(val, 7)}d`;
+    };
+
+    const validateCustomInput = (value, unit) => {
+        const num = parseInt(value, 10);
+        if (isNaN(num) || num <= 0) return '';
+        if (unit === 'hours') return String(Math.min(num, 24));
+        return String(Math.min(num, 7));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -34,7 +52,7 @@ function Home() {
                 content,
                 language,
                 title: title.trim() || 'Untitled',
-                expiresIn
+                expiresIn: getExpirationValue()
             });
             navigate(`/${response.data._id}`);
         } catch (err) {
@@ -61,19 +79,19 @@ function Home() {
             <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Title, Language, and Expiration Row */}
-                    <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex flex-col sm:flex-row gap-4 items-center">
                         <input
                             type="text"
                             placeholder="Paste title (optional)"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="flex-1 bg-[#44475a] text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                            className="flex-1 bg-[#44475a] text-white text-center px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
                             maxLength={100}
                         />
                         <select
                             value={language}
                             onChange={(e) => setLanguage(e.target.value)}
-                            className="bg-[#44475a] text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer"
+                            className="bg-[#44475a] text-white text-center px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer"
                         >
                             {LANGUAGES.map((lang) => (
                                 <option key={lang.value} value={lang.value}>
@@ -84,7 +102,7 @@ function Home() {
                         <select
                             value={expiresIn}
                             onChange={(e) => setExpiresIn(e.target.value)}
-                            className="bg-[#44475a] text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer"
+                            className="bg-[#44475a] text-white text-center px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer"
                         >
                             {EXPIRATION_OPTIONS.map((opt) => (
                                 <option key={opt.value} value={opt.value}>
@@ -93,6 +111,34 @@ function Home() {
                             ))}
                         </select>
                     </div>
+
+                    {/* Custom Expiration Input */}
+                    {expiresIn === 'custom' && (
+                        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max={customUnit === 'hours' ? 24 : 7}
+                                    placeholder={customUnit === 'hours' ? '1-24' : '1-7'}
+                                    value={customValue}
+                                    onChange={(e) => setCustomValue(validateCustomInput(e.target.value, customUnit))}
+                                    className="w-24 bg-[#44475a] text-white text-center px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                                />
+                                <select
+                                    value={customUnit}
+                                    onChange={(e) => {
+                                        setCustomUnit(e.target.value);
+                                        setCustomValue(validateCustomInput(customValue, e.target.value));
+                                    }}
+                                    className="bg-[#44475a] text-white text-center px-4 py-2 rounded-lg border border-gray-600 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors cursor-pointer"
+                                >
+                                    <option value="hours">Hours (max 24)</option>
+                                    <option value="days">Days (max 7)</option>
+                                </select>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Code Editor */}
                     <div className="relative">
@@ -163,8 +209,10 @@ function Home() {
                 <div className="mt-8 text-center text-gray-500 text-sm">
                     <p>
                         <i className="fas fa-clock mr-1"></i>
-                        {expiresIn === 'never'
-                            ? 'This paste will never expire'
+                        {expiresIn === 'custom'
+                            ? customValue
+                                ? `Paste will expire after ${customValue} ${customUnit}`
+                                : 'Enter custom expiration time'
                             : `Paste will expire after ${EXPIRATION_OPTIONS.find(o => o.value === expiresIn)?.label.toLowerCase()}`
                         }
                     </p>
