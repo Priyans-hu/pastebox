@@ -10,11 +10,10 @@ exports.createPaste = async (req, res) => {
             return res.status(400).json({ error: 'Content is required' });
         }
 
-        // Validate expiresIn
-        const validOptions = Paste.getExpirationOptions();
-        if (!validOptions.includes(expiresIn)) {
+        // Validate expiresIn format
+        if (!Paste.isValidExpiration(expiresIn)) {
             return res.status(400).json({
-                error: `Invalid expiresIn value. Valid options: ${validOptions.join(', ')}`
+                error: 'Invalid expiration format. Use 1-24h (hours), 1-7d (days), or 1w (week)'
             });
         }
 
